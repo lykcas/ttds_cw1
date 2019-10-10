@@ -108,7 +108,6 @@ for i in my_index:
     fileObject.write('\n')
 fileObject.close()
 
-
 fileObject = open('index.txt', 'w')
 for i in my_index:
     fileObject.write(i + ':\n')
@@ -117,6 +116,8 @@ for i in my_index:
         fileObject.write(str(my_index[i][j]) + '\n')
     fileObject.write('\n')
 fileObject.close()
+
+
 
 
 
