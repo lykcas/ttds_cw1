@@ -92,6 +92,31 @@ for node in root:
             my_index[term][docno].append(position)
             position += 1
 
+import json
+# js_my_index = json.dumps(my_index)
+
+fileObject = open('index.json', 'w')
+# fileObject.writelines(js_my_index)
+# fileObject.close()
+
+for i in my_index:
+    # js_i = json.dumps(i)
+    fileObject.write(i + ':\n')
+    for j in my_index[i]:
+        fileObject.write('          ' + json.dumps(j) + ': ')
+        fileObject.writelines(json.dumps(my_index[i][j]) + '\n')
+    fileObject.write('\n')
+fileObject.close()
+
+
+fileObject = open('index.txt', 'w')
+for i in my_index:
+    fileObject.write(i + ':\n')
+    for j in my_index[i]:
+        fileObject.write('          ' + str(j) + ': ')
+        fileObject.write(str(my_index[i][j]) + '\n')
+    fileObject.write('\n')
+fileObject.close()
 
 
 
