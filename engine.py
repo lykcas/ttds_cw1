@@ -1,52 +1,3 @@
-# import numpy as np
-# import string
-# import re
-# import xml.etree.cElementTree as ET
-#
-# str_xml = open('sample.xml', 'r').read()
-# root = ET.XML(str_xml)
-# # 关于root的遍历方法
-# for child in root:
-#     for i in child:
-#         print(i.text)
-#
-# for node in root.iter('DOCNO'):
-#     print(node.text)
-#
-# for node in root.findall('DOC'):
-#     rank = int(node.find('DOCNO').text)
-#     # rank = int(rank)
-#     print(rank)
-#
-# from collections import defaultdict
-# # d = defaultdict(list) # 字典套List
-# # d['a'].append(1)
-# # d['a'].append(2)
-# # d['b'].append(4)
-# profile = defaultdict(dict)
-# profile.setdefault('add',dict())
-# profile['add'].setdefault(2,list())
-# profile['add'][2].append(10)
-# profile['add'][2].append(20)
-# profile['add'].setdefault(55, list())
-# profile['add'][55].append(555)
-# t = 0
-# tt = profile['add'][2][t]
-# str_add = 'baby'
-# docno = 1
-# position = 1
-# profile.setdefault(str_add, dict())
-# profile[str_add].setdefault(docno, list())
-# profile[str_add][docno].append(position)
-# # 判断指定的string是否在字典的key中
-# print(profile[str_add].keys())
-# str_fake = 'babe'
-# if profile.get(str_fake):
-#     print(1)
-# else:
-#     print(11)
-
-
 # apply in sample.xml
 import string
 from stemming.porter2 import stem
@@ -93,30 +44,133 @@ for node in root:
             position += 1
 
 import json
-# js_my_index = json.dumps(my_index)
-
 fileObject = open('index.json', 'w')
-# fileObject.writelines(js_my_index)
-# fileObject.close()
 
 for i in my_index:
     # js_i = json.dumps(i)
-    fileObject.write(i + ':\n')
+    fileObject.write(i + '\n')
     for j in my_index[i]:
-        fileObject.write('          ' + json.dumps(j) + ': ')
+        fileObject.write('          ' + json.dumps(j) + ' ')
         fileObject.writelines(json.dumps(my_index[i][j]) + '\n')
     fileObject.write('\n')
 fileObject.close()
 
 fileObject = open('index.txt', 'w')
 for i in my_index:
-    fileObject.write(i + ':\n')
+    fileObject.write(i + '\n')
     for j in my_index[i]:
-        fileObject.write('          ' + str(j) + ': ')
+        fileObject.write('          ' + str(j) + ' ')
         fileObject.write(str(my_index[i][j]) + '\n')
     fileObject.write('\n')
 fileObject.close()
 
+def one_term_search(my_index, one_term):
+    # flag = 2
+    results = 'No result'
+    if my_index.get(one_term):
+        return my_index[one_term]
+    else:
+        return results
+
+def bool_term_search(my_index, bool_term_a, flag, bool_term_b):
+    sear_type = 0 # AND = 1, OR = 2, NOT = 3
+    if flag == 'AND': sear_type = 1
+    elif flag == 'OR': sear_type = 2
+    elif flag == 'AND NOT': sear_type = 3
+
+    if sear_type == 1:
+        if my_index.get(bool_term_a) and my_index.get(bool_term_b):
+            # dict1 = defaultdict(list)
+            # dict2 = defaultdict(list)
+            dict1 = my_index[bool_term_a].copy()
+            dict2 = my_index[bool_term_b].copy()
+            d = []
+            results = 0
+            for docid in dict1:
+                if docid in dict2.keys():
+                    d.append(docid)
+                    results = 1
+            if results == 0:
+                return 'No result'
+            elif results == 1:
+                d = sorted(list(set(d)))
+                return d
+        else:
+            return  'No result'
+    elif sear_type == 2:
+        if my_index.get(bool_term_a) or my_index.get(bool_term_b):
+            dict1 = my_index[bool_term_a].copy()
+            dict2 = my_index[bool_term_b].copy()
+            d = []
+            for docid in dict1:
+                d.append(docid)
+            for docid in dict2:
+                d.append(docid)
+            d = sorted(list(set(d)))
+            return d
+        else:
+            return 'No result'
+    elif sear_type == 3:
+        if my_index.get(bool_term_a) or my_index.get(bool_term_b):
+            dict1 = my_index[bool_term_a].copy()
+            dict2 = my_index[bool_term_b].copy()
+            d = []
+            results = 0
+            for docid in dict1:
+                if docid not in dict2.keys():
+                    d.append(docid)
+                    results = 1
+            if results == 0:
+                return 'No result'
+            elif results == 1:
+                d = sorted(list(set(d)))
+                return d
+        else:
+            return 'No result'
+
+def phrase_search(my_index, phrase_a, phrase_b):
+    if my_index.get(phrase_a) and my_index.get(phrase_b):
+        dict1 = my_index[phrase_a].copy()
+        dict2 = my_index[phrase_b].copy()
+        d = []
+        results = 0
+        for docid in dict1:
+            if docid in dict2.keys():
+                for position1 in dict1[docid]:
+                    for position2 in dict2[docid]:
+                        if (position2 - position1) == 1:
+                            d.append(docid)
+                            results = 1
+        if results == 1:
+            d = sorted(list(set(d)))
+            return d
+        elif results == 0:
+            return 'No result'
+
+def distence_search(my_index, dis_a, dis_b, dis):
+    if my_index.get(dis_a) and my_index.get(dis_b):
+        dict1 = my_index[dis_a].copy()
+        dict2 = my_index[dis_b].copy()
+        d = []
+        results = 0
+        for docid in dict1:
+            if docid in dict2.keys():
+                for position1 in dict1[docid]:
+                    for position2 in dict2[docid]:
+                        if abs(position1 - position2) <= dis:
+                            d.append(docid)
+                            results = 1
+        if results == 1:
+            d = sorted(list(set(d)))
+            return d
+        elif results == 0:
+            return 'No result'
+
+def comp_bool_search(my_index, term_a, term_b, flag):
+    sear_type = 0 # AND = 1, OR = 2, NOT = 3
+    if flag == 'AND': sear_type = 1
+    elif flag == 'OR': sear_type = 2
+    elif flag == 'AND NOT': sear_type = 3
 
 
 
