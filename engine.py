@@ -138,7 +138,7 @@ def comp_bool_search(my_index, term_long, term_short, sear_type):
     if my_index.get(term_short):
         short_docid = my_index[term_short].keys()
 
-    if phrase_search(my_index, term_a, term_b) is not 'No result':
+    if phrase_search(my_index, term_a, term_b) != 'No result':
         long_docid = phrase_search(my_index, term_a, term_b)
 
     if sear_type == 1:
@@ -178,7 +178,7 @@ def search_active(stops, my_index):
         for i in str_input:
             if i == '(':
                 break
-            if i is not '#':
+            if i != '#':
                 dis.append(i)
         dis_str = "".join(dis)
         dis_int = int(dis_str)
@@ -197,7 +197,7 @@ def search_active(stops, my_index):
         # exit()
     double_quatation = re.compile('"')
     whether_double_quatiation = double_quatation.match(str_input)  # 若输入含"，则 whether_double_quatiation = 1
-    if str_input[-1] is '"':
+    if str_input[-1] == '"':
         phrase_str = str_input[1:-1]
         phrase_str.split()
         phrase_a = term_manage(phrase_str[0], stops)
@@ -238,11 +238,36 @@ def search_active(stops, my_index):
                 pos1 = str_input.find('AND')
                 term_long = str_input[1:pos1-2]
                 term_short = str_input[pos1+4:]
-
-
+                return comp_bool_search(my_index, term_long, term_short, 1)
+            else:
+                pos1 = str_input.find('AND')
+                term_long = str_input[pos1+5:-1]
+                term_short = str_input[0:pos1-1]
+                return comp_bool_search(my_index, term_long, term_short, 1)
         elif str_input.find('OR'):
-
+            if str_input[0] == '"':
+                pos1 = str_input.find('OR')
+                term_long = str_input[1:pos1-2]
+                term_short = str_input[pos1+3:]
+                return comp_bool_search(my_index, term_long, term_short, 2)
+            else:
+                pos1 = str_input.find('OR')
+                term_long = str_input[pos1+4:-1]
+                term_short = str_input[0:pos1-1]
+                return comp_bool_search(my_index, term_long, term_short, 2)
         elif str_input.find('AND NOT'):
+            if str_input[0] == '"':
+                pos1 = str_input.find('AND NOT')
+                term_long = str_input[1:pos1-2]
+                term_short = str_input[pos1+8:]
+                return comp_bool_search(my_index, term_long, term_short, 3)
+            else:
+                pos1 = str_input.find('AND NOT')
+                term_long = str_input[pos1+9:-1]
+                term_short = str_input[0:pos1-1]
+                return comp_bool_search(my_index, term_long, term_short, 4)
+    else:
+        return 'No result'
 
 
 if __name__ == '__main__':
