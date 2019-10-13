@@ -8,7 +8,7 @@ import xml.etree.cElementTree as ET
 
 
 def term_manage(term, stops):
-    trantab = str.maketrans(dict.fromkeys(string.punctuation, ''))
+    trantab = str.maketrans(dict.fromkeys(string.punctuation, ' '))
     term = term.translate(trantab)
     term = term.lower()
     if term in stops:
@@ -88,7 +88,7 @@ def phrase_search(my_index, phrase_a, phrase_b):
         dict2 = my_index[phrase_b].copy()
         d = []
         results = 0
-        for docid in dict1:
+        for docid in dict1.keys():
             if docid in dict2.keys():
                 for position1 in dict1[docid]:
                     for position2 in dict2[docid]:
@@ -199,7 +199,7 @@ def search_active(stops, my_index):
     whether_double_quatiation = double_quatation.match(str_input)  # 若输入含"，则 whether_double_quatiation = 1
     if str_input[-1] == '"':
         phrase_str = str_input[1:-1]
-        phrase_str.split()
+        phrase_str = phrase_str.split()
         phrase_a = term_manage(phrase_str[0], stops)
         phrase_b = term_manage(phrase_str[1], stops)
         return phrase_search(my_index, phrase_a, phrase_b)
