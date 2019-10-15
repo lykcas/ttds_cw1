@@ -131,7 +131,9 @@ def comp_bool_search(my_index, term_long, term_short, sear_type):
     results = 0
     temp = term_long.split()
     term_a = temp[0]
+    term_a = term_manage(term_a, stops)
     term_b = temp[1]
+    term_b = term_manage(term_b, stops)
     short_docid = []
     long_docid = []
     d = []
@@ -204,15 +206,15 @@ def search_active(stops, my_index):
         phrase_b = term_manage(phrase_str[1], stops)
         return phrase_search(my_index, phrase_a, phrase_b)
         # exit()
-    if not whether_double_quatiation:
-        if str_input.find('AND'):
-            sear_type = 1
-            pos1 = str_input.find('AND')
+    if whether_double_quatiation == 0:
+        if str_input.find('AND NOT'):
+            sear_type = 3
+            pos1 = str_input.find('AND NOT')
             bool_term_a = str_input[0:pos1 - 1]
-            bool_term_b = str_input[pos1 + 4:]
+            bool_term_b = str_input[pos1 + 8:]
             bool_term_a = term_manage(bool_term_a, stops)
             bool_term_b = term_manage(bool_term_b, stops)
-            return bool_term_search(my_index, bool_term_a, 1, bool_term_b)
+            return bool_term_search(my_index, bool_term_a, 3, bool_term_b)
             # exit()
         elif str_input.find('OR'):
             sear_type = 2
@@ -223,27 +225,27 @@ def search_active(stops, my_index):
             bool_term_b = term_manage(bool_term_b, stops)
             return bool_term_search(my_index, bool_term_a, 2, bool_term_b)
             # exit()
-        elif str_input.find('AND NOT'):
-            sear_type = 3
-            pos1 = str_input.find('AND NOT')
+        elif str_input.find('AND'):
+            sear_type = 1
+            pos1 = str_input.find('AND')
             bool_term_a = str_input[0:pos1 - 1]
-            bool_term_b = str_input[pos1 + 8:]
+            bool_term_b = str_input[pos1 + 4:]
             bool_term_a = term_manage(bool_term_a, stops)
             bool_term_b = term_manage(bool_term_b, stops)
-            return bool_term_search(my_index, bool_term_a, 3, bool_term_b)
+            return bool_term_search(my_index, bool_term_a, 1, bool_term_b)
             # exit()
     if whether_double_quatiation:
-        if str_input.find('AND'):
+        if str_input.find('AND NOT'):
             if str_input[0] == '"':
-                pos1 = str_input.find('AND')
+                pos1 = str_input.find('AND NOT')
                 term_long = str_input[1:pos1-2]
-                term_short = str_input[pos1+4:]
-                return comp_bool_search(my_index, term_long, term_short, 1)
+                term_short = str_input[pos1+8:]
+                return comp_bool_search(my_index, term_long, term_short, 3)
             else:
-                pos1 = str_input.find('AND')
-                term_long = str_input[pos1+5:-1]
+                pos1 = str_input.find('AND NOT')
+                term_long = str_input[pos1+9:-1]
                 term_short = str_input[0:pos1-1]
-                return comp_bool_search(my_index, term_long, term_short, 1)
+                return comp_bool_search(my_index, term_long, term_short, 4)
         elif str_input.find('OR'):
             if str_input[0] == '"':
                 pos1 = str_input.find('OR')
@@ -255,17 +257,17 @@ def search_active(stops, my_index):
                 term_long = str_input[pos1+4:-1]
                 term_short = str_input[0:pos1-1]
                 return comp_bool_search(my_index, term_long, term_short, 2)
-        elif str_input.find('AND NOT'):
+        elif str_input.find('AND'):
             if str_input[0] == '"':
-                pos1 = str_input.find('AND NOT')
+                pos1 = str_input.find('AND')
                 term_long = str_input[1:pos1-2]
-                term_short = str_input[pos1+8:]
-                return comp_bool_search(my_index, term_long, term_short, 3)
+                term_short = str_input[pos1+4:]
+                return comp_bool_search(my_index, term_long, term_short, 1)
             else:
-                pos1 = str_input.find('AND NOT')
-                term_long = str_input[pos1+9:-1]
+                pos1 = str_input.find('AND')
+                term_long = str_input[pos1+5:-1]
                 term_short = str_input[0:pos1-1]
-                return comp_bool_search(my_index, term_long, term_short, 4)
+                return comp_bool_search(my_index, term_long, term_short, 1)
     else:
         return 'No result'
 
@@ -276,7 +278,7 @@ if __name__ == '__main__':
     trantab = str.maketrans(dict.fromkeys(string.punctuation, ' '))
     stopwords = open('englishST.txt')
     stops = stopwords.read()
-    stops.split()
+    stops = stops.split()
     my_index = defaultdict(dict)
     for node in root:
         docno = int(node.find('DOCNO').text)
