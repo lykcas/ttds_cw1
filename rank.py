@@ -6,6 +6,15 @@ from collections import defaultdict
 import xml.etree.cElementTree as ET
 import math
 
+def one_term_search(my_index, one_term):
+    # flag = 2
+    # results = 'No result'
+    d = []
+    if my_index.get(one_term):
+        for docid in my_index[one_term]:
+            d.append(docid)
+        return d
+
 if __name__ == '__main__':
     str_xml = open('trec.sample.xml', 'r').read()
     root = ET.XML(str_xml)
@@ -14,7 +23,9 @@ if __name__ == '__main__':
     stops = stopwords.read()
     stops = stops.split()
     my_index = defaultdict(dict)
+    id_count = 0
     for node in root:
+        id_count = id_count + 1
         docno = int(node.find('DOCNO').text)
         text_head = node.find('HEADLINE').text
         text_text = node.find('TEXT').text
@@ -47,27 +58,14 @@ if __name__ == '__main__':
                 my_index[term][docno].append(position)
                 position += 1
 
-    # fileObject = open('index.json', 'w')
-    #
-    # for i in my_index:
-    #     fileObject.write(i + '\n')
-    #     for j in my_index[i]:
-    #         fileObject.write('          ' + json.dumps(j) + ' ')
-    #         fileObject.writelines(json.dumps(my_index[i][j]) + '\n')
-    #     fileObject.write('\n')
-    # fileObject.close()
-    #
-    # fileObject = open('index.txt', 'w')
-    # for i in my_index:
-    #     fileObject.write(i + '\n')
-    #     for j in my_index[i]:
-    #         fileObject.write('          ' + str(j) + ' ')
-    #         fileObject.write(str(my_index[i][j]) + '\n')
-    #     fileObject.write('\n')
-    # fileObject.close()
-
-    while True:
-        str_input = input('Please input:')
+    f = open('./query.txt')
+    file_result = open('ranked_retrieval.txt', 'w')
+    lines = f.readlines()
+    for line in lines:
+        line = line.strip('\n')
+        pos1 = line.find(' ')
+        query_number = int(line[0:pos1])
+        str_input = line[pos1 + 1:]
         str_input = str_input.split()
         my_query = []
         for term in str_input:
@@ -81,7 +79,7 @@ if __name__ == '__main__':
                 my_query.append(term)
 
         df_idf = defaultdict(list)
-        n = len(my_index.keys())
+        n = id_count
         for term in my_query:
             df_idf.setdefault(term, [])
             df_count = len(my_index[term].keys())
@@ -89,11 +87,43 @@ if __name__ == '__main__':
             idf_count = math.log10(n/df_count)
             df_idf[term].append(idf_count)
 
-        
+        term_all_docid = one_term_search(my_index, my_query[0])
+        term2 = []
+        for term in my_query:
+            term2 = one_term_search(my_index, term)
+            term_all_docid = list(set(term_all_docid).union(set(term2))) # term_all_docid 是一个list
 
         tf = defaultdict(dict)
-        for
+        for docid in term_all_docid:
+            tf.setdefault(docid, dict())
+            for term in my_query:
+                tf[docid].setdefault(term, list())
+                if my_index[term].get(docid):
+                    tf[docid][term].append(len(my_index[term][docid]))
+                else:
+                    tf[docid][term].append(0)
 
-        # score = defaultdict(list)
-        # for term in my_query:
-        #     score.setdefault(term, [])
+        score = {}
+        for docid in term_all_docid:
+            weight_total = 0
+            for term in my_query:
+                if tf[docid][term][0] != 0:
+                    tf_count = tf[docid][term][0]
+                    weight = (1 + math.log10(tf_count)) * df_idf[term][1]
+                else:
+                    weight = 0
+                weight_total = weight_total + weight
+            score[docid] = weight_total
+
+        result = sorted(score.items(), key=lambda x: x[1], reverse=True)
+        i = 2
+        j = 0
+        while i:
+            file_result.write(str(query_number) + ' 0 ' + str(result[j][0]) + ' 0 ' + str(result[j][1]) + ' 0')
+            file_result.write('\n')
+            # print('0 ' + str(result[j][0]) + ' 0 ' + str(result[j][1]) + ' 0')
+            j += 1
+            i -= 1
+
+    file_result.close()
+    f.close()
