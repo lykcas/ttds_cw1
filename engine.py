@@ -100,7 +100,7 @@ def search_active(stops, my_index):
     for line in lines:
         line = line.strip('\n')
         pos1 = line.find(' ')
-        query_number = line[1:pos1-1]
+        query_number = line[0:pos1]
         str_input = line[pos1+1:]
         result = []
 

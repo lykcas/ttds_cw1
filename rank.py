@@ -94,7 +94,6 @@ if __name__ == '__main__':
         while i:
             file_result.write(str(query_number) + ' 0 ' + str(result[j][0]) + ' 0 ' + str(result[j][1]) + ' 0')
             file_result.write('\n')
-            # print('0 ' + str(result[j][0]) + ' 0 ' + str(result[j][1]) + ' 0')
             j += 1
             i -= 1
 
