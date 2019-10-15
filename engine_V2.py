@@ -94,6 +94,7 @@ def distence_search(my_index, dis_a, dis_b, dis):
 
 
 def search_active(stops, my_index):
+    f_ = 
     str_input = input("Please input: ")
     hash_ = re.compile("#")
     whether_hash = hash_.match(str_input)
