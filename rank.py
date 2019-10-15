@@ -22,41 +22,14 @@ if __name__ == '__main__':
     stopwords = open('englishST.txt')
     stops = stopwords.read()
     stops = stops.split()
-    my_index = defaultdict(dict)
+    stopwords.close()
     id_count = 0
     for node in root:
         id_count = id_count + 1
-        docno = int(node.find('DOCNO').text)
-        text_head = node.find('HEADLINE').text
-        text_text = node.find('TEXT').text
-        text = text_head + text_text
-        text = text.translate(trantab)
-        token_text = text.split()
-        token_lower_text = []
-        for term in token_text:
-            token_lower_text.append(term.lower())
-        token_lower_stop_text = []
-        for term in token_lower_text:
-            if term not in stops:
-                token_lower_stop_text.append(term)
-        token_lower_stop_stem_text = []
-        for term in token_lower_stop_text:
-            token_lower_stop_stem_text.append(stem(term))
-        position = 1
-        for term in token_lower_stop_stem_text:
-            if term in my_index.keys():
-                if docno in my_index[term].keys():
-                    my_index[term][docno].append(position)
-                    position += 1
-                else:
-                    my_index[term].setdefault(docno, list()) # 1
-                    my_index[term][docno].append(position)
-                    position += 1
-            else:
-                my_index.setdefault(term, dict())
-                my_index[term].setdefault(docno, list())
-                my_index[term][docno].append(position)
-                position += 1
+
+    with open('index.json', 'r') as ff:
+        my_index = json.load(ff)
+    ff.close()
 
     f = open('./query.txt')
     file_result = open('ranked_retrieval.txt', 'w')
